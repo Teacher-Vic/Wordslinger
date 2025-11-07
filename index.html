@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Wordslinger</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #faf9f6;
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+  color: #222;
+}
+h1, h2 { text-align: center; }
+select, button {
+  font-size: 16px;
+  padding: 10px;
+  margin: 8px 0;
+  width: 100%;
+}
+.word-box, .favorite-card {
+  background: white;
+  border-radius: 10px;
+  padding: 18px;
+  margin-top: 15px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+}
+.example {
+  margin-left: 15px;
+  opacity: 0.9;
+}
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.buttons button {
+  width: 48%;
+}
+.favorite-card {
+  position: relative;
+}
+.delete-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  color: red;
+}
+nav {
+  text-align: center;
+  margin: 20px 0;
+}
+nav button {
+  width: auto;
+  margin: 0 10px;
+  padding: 8px 16px;
+}
+</style>
+</head>
+<body>
+
+<h1>Wordslinger</h1>
+<nav>
+  <button id="homeBtn">Home</button>
+  <button id="favoritesBtn">Favorites</button>
+</nav>
+
+<div id="homePage">
+  <label>Choose Level:</label>
+  <select id="level">
+    <option value="beginner">Beginner</option>
+    <option value="journey">Journey</option>
+    <option value="advanced">Advanced</option>
+    <option value="master">Master</option>
+  </select>
+
+  <div class="word-box" id="display"></div>
+
+  <div class="buttons">
+    <button id="favBtn">Favorite</button>
+    <button id="newBtn">New Word</button>
+  </div>
+</div>
+
+<div id="favoritesPage" style="display:none;">
+  <h2>My Favorites</h2>
+  <div id="favoritesList"></div>
+</div>
+
+<script>
+const words = {
+  beginner: ["apple","water","bread","house","school","teacher","student","family","friend","city","morning","night","day","week","month","year","time","place","world","story","book","movie","music","game","phone","table","chair","door","window","floor","smile","laugh","cry","think","learn","understand","remember","forget","hope","help","use","work","play","move","open","close","carry","send","bring","look","watch","listen","hear","speak","say","tell","ask","answer","call","run","walk","sit","stand","sleep","wake","eat","drink","cook","clean","fast","slow","easy","hard","big","small","short","long","high","low","happy","sad","angry","tired","hungry","thirsty","warm","cold","bright","dark","good","bad","new","old","young","early","late","ready","sure","true","pick up","put down","turn on","turn off","look for","look at","look after","sit down","stand up","wake up","come back","go out","give up","take off","bring back","carry on","find out","run out","get up","get in","get out","take away","put back","come in","hold on"],
+  journey: ["travel","visit","arrive","leave","return","stay","reach","plan","decide","choose","prefer","enjoy","remember","remind","consider","realize","guess","notice","wonder","believe","explain","describe","discuss","suggest","recommend","promise","agree","refuse","accept","invite","borrow","lend","spend","save","earn","share","improve","develop","create","build","change","continue","repeat","avoid","protect","allow","support","prevent","prepare","organize","compare","connect","include","contain","control","reduce","increase","measure","achieve","complete","comfortable","available","necessary","possible","impossible","similar","different","correct","incorrect","serious","basic","common","general","specific","simple","complex","modern","traditional","natural","usual","confident","polite","honest","creative","careful","powerful","peaceful","useful","friendly","healthy","choice","decision","experience","opinion","problem","solution","reason","example","situation","conversation","message","question","answer","explanation","relationship","information","knowledge","improvement","progress","opportunity","success","failure","difference","purpose","method","get along","hang out","calm down","cheer up","grow up","work out","figure out","show up","set up","break down","carry on","find out","run into","look up","come across","take care of","think about","look forward to","sort out","move on","pay attention","take part","deal with","check out","hold on"],
+  advanced: ["analyze","evaluate","interpret","identify","explain","define","describe","summarize","clarify","discuss","support","challenge","measure","compare","contrast","select","demonstrate","establish","maintain","achieve","require","provide","include","involve","affect","influence","depend","relate","indicate","suggest","improve","develop","increase","reduce","avoid","prepare","organize","manage","maintain","acquire","predict","assume","consider","reflect","imply","reveal","express","represent","emphasize","highlight","confirm","debate","question","justify","argue","propose","recommend","conclude","summarize","define","significant","essential","appropriate","relevant","accurate","reliable","effective","efficient","complex","simple","specific","general","formal","informal","logical","typical","reasonable","practical","professional","traditional","structure","function","process","method","system","context","purpose","effect","result","evidence","data","research","knowledge","skill","ability","resource","material","example","model","theory","responsibility","opportunity","challenge","advantage","disadvantage","limit","goal","priority","strategy","category","agreement","argument","perspective","relationship","contrast","connection","impact","conclusion","discussion","interpretation","carry out","point out","set up","find out","focus on","deal with","refer to","rely on","result in","lead to","look into","work on","based on","according to","come up with","break down","go over","take on","fill in","go through","turn out","make up"],
+  master: ["serene","tranquil","calm","gentle","tender","delicate","fragile","graceful","elegant","subtle","vivid","radiant","luminous","glowing","vibrant","brilliant","dazzling","faint","dim","shadowy","profound","meaningful","significant","deep","thoughtful","reflective","introspective","contemplative","philosophical","spiritual","mysterious","enigmatic","uncertain","ambiguous","elusive","fleeting","temporary","momentary","eternal","endless","sacred","precious","beloved","cherished","dear","intimate","personal","distant","detached","reserved","fierce","passionate","intense","ardent","eager","yearning","longing","wistful","nostalgic","melancholic","courage","honor","virtue","hope","faith","purpose","destiny","fate","freedom","justice","wisdom","insight","vision","clarity","wonder","gratitude","awe","reverence","compassion","mercy","endure","persevere","overcome","transcend","embrace","surrender","restore","awaken","transform","illuminate","wander","roam","linger","dwell","unfold","emerge","bloom","blossom","fade","wither","whisper","murmur","echo","resonate","soar","ascend","descend","vanish","dissolve","linger","glisten","shimmer","sparkle","tremble","quiver","shiver","hesitate","pause","remain","linger","solitude","silence","stillness","presence","essence","memory","dream","vision","truth","beauty","sorrow","joy","grief","delight","rapture","calm","chaos","balance","harmony","contrast","carry on","hold on","let go","rise up","fall apart","break through","come undone","grow beyond","start over","begin again"]
+};
+
+let history = JSON.parse(localStorage.getItem("history_words")) || [];
+let favorites = JSON.parse(localStorage.getItem("favorite_words")) || [];
+let currentWord = null;
+
+// Example generator
+function makeExample(word, type) {
+  const templates = {
+    noun: [`I saw a ${word} today.`,`The ${word} was on the table.`,`She talked about the ${word} in class.`],
+    verb: [`I will ${word} later.`,`They decided to ${word} together.`,`Try to ${word} if you can.`],
+    adjective: [`The weather is very ${word} today.`,`She seems ${word} this morning.`,`That was a ${word} idea.`],
+    default: [`This is an example using the word "${word}".`]
+  };
+  const group = templates[type] || templates.default;
+  return group[Math.floor(Math.random() * group.length)];
+}
+
+// New word fetch
+async function newWord() {
+  try {
+    const lvl = document.getElementById("level").value;
+    const pool = words[lvl];
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
+
+    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${chosen}`);
+    if (!res.ok) throw new Error("Word not found");
+
+    const data = await res.json();
+    const entry = data[0];
+
+    const meaning = entry.meanings[0];
+    const validTypes = ["noun","verb","adjective"];
+    const type = validTypes.includes(meaning.partOfSpeech) ? meaning.partOfSpeech : "default";
+    const definition = meaning.definitions[0].definition;
+
+    let examples = [];
+    entry.meanings.forEach(m => m.definitions.forEach(d => { if(d.example) examples.push(d.example) }));
+    if (examples.length === 0) {
+      examples = [makeExample(entry.word,type), makeExample(entry.word,type), makeExample(entry.word,type)];
+    }
+
+    currentWord = { word: entry.word, type, def: definition, ex: examples.slice(0,3) };
+    history.push(currentWord.word);
+    localStorage.setItem("history_words", JSON.stringify(history));
+    displayWord();
+  } catch(err) {
+    const lvl = document.getElementById("level").value;
+    const pool = words[lvl];
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
+    currentWord = { word: chosen, type: "unknown", def: "No definition available", ex: [makeExample(chosen,"default")] };
+    displayWord();
+  }
+}
+
+// Display word
+function displayWord() {
+  const box = document.getElementById("display");
+  box.innerHTML = `
+    <strong>Word:</strong> ${currentWord.word}<br>
+    <strong>Level:</strong> ${document.getElementById("level").value}<br>
+    <strong>Part of Speech:</strong> ${currentWord.type}<br>
+    <strong>Definition:</strong> ${currentWord.def}<br><br>
+    <strong>Examples:</strong><br>
+    ${currentWord.ex.map(e=>`<div class="example">• ${e}</div>`).join("")}
+  `;
+}
+
+// Favorite a word
+document.getElementById("favBtn").onclick = function() {
+  if (!currentWord) return;
+  if (!favorites.find(f=>f.word===currentWord.word)) {
+    favorites.push({...currentWord}); // clone object to avoid reference issues
+    localStorage.setItem("favorite_words", JSON.stringify(favorites));
+    alert("Added to favorites!");
+    
+    // update favorites page immediately if visible
+    if(document.getElementById("favoritesPage").style.display === "block") {
+      showFavorites();
+    }
+  } else {
+    alert("This word is already in favorites!");
+  }
+}
+
+// Show favorites
+function showFavorites() {
+  const list = document.getElementById("favoritesList");
+  list.innerHTML = "";
+  if(favorites.length===0) {
+    list.innerHTML = "No favorites yet.";
+    return;
+  }
+  
+  favorites.forEach((f,i)=>{
+    const card = document.createElement("div");
+    card.className = "favorite-card";
+    card.innerHTML = `
+      <span class="delete-btn">&#128465;</span>
+      <strong>Word:</strong> ${f.word}<br>
+      <strong>Part of Speech:</strong> ${f.type}<br>
+      <strong>Definition:</strong> ${f.def}<br><br>
+      <strong>Examples:</strong><br>
+      ${f.ex.map(e=>`<div class="example">• ${e}</div>`).join("")}
+    `;
+    card.querySelector(".delete-btn").addEventListener("click", ()=>deleteFavorite(i));
+    list.appendChild(card);
+  });
+}
+
+// Delete favorite
+function deleteFavorite(index) {
+  favorites.splice(index,1);
+  localStorage.setItem("favorite_words", JSON.stringify(favorites));
+  showFavorites();
+}
+
+// Navigation
+document.getElementById("homeBtn").onclick = () => {
+  document.getElementById("homePage").style.display = "block";
+  document.getElementById("favoritesPage").style.display = "none";
+}
+document.getElementById("favoritesBtn").onclick = () => {
+  document.getElementById("homePage").style.display = "none";
+  document.getElementById("favoritesPage").style.display = "block";
+  showFavorites();
+}
+
+document.getElementById("newBtn").onclick = newWord;
+
+// Load first word on page load
+newWord();
+</script>
+
+</body>
+</html>
