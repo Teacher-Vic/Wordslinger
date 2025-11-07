@@ -62,16 +62,87 @@ select, button {
 <script>
 const words = {
   beginner: [
-    "apple","happy","book","learn","friend","water","carry","sleep","slow","fast",
-    "kind","bright","clean","cold","warm"
-  ],
+  "apple","water","bread","house","school","teacher","student","family","friend","city",
+  "morning","night","day","week","month","year","time","place","world","story",
+  "book","movie","music","game","phone","table","chair","door","window","floor",
+  "smile","laugh","cry","think","learn","understand","remember","forget","hope",
+  "help","use","work","play","move","open","close","carry","send","bring",
+  "look","watch","listen","hear","speak","say","tell","ask","answer","call",
+  "run","walk","sit","stand","sleep","wake","eat","drink","cook","clean",
+  "fast","slow","easy","hard","big","small","short","long","high","low",
+  "happy","sad","angry","tired","hungry","thirsty","warm","cold","bright","dark",
+  "good","bad","new","old","young","early","late","ready","sure","true",
+  
+  "pick up","put down","turn on","turn off","look for","look at","look after","sit down","stand up","wake up",
+  "come back","go out","give up","take off","bring back","carry on","find out","run out","get up","get in",
+  "get out","take away","put back","come in","hold on"
+],
   journey: [
-    "wander","gather","adjust","certain","encourage","avoid","attempt","confident",
-    "delight","effort","include","maintain","brief","method","focus","unique",
-    "recent","compare","express","respond"
-  ],
-  advanced: [],
-  master: []
+  "travel","visit","arrive","leave","return","stay","reach","plan","decide","choose",
+  "prefer","enjoy","remember","remind","consider","realize","guess","notice","wonder","believe",
+  "explain","describe","discuss","suggest","recommend","promise","agree","refuse","accept","invite",
+  "borrow","lend","spend","save","earn","share","improve","develop","create","build",
+  "change","continue","repeat","avoid","protect","allow","support","prevent","prepare","organize",
+  "compare","connect","include","contain","control","reduce","increase","measure","achieve","complete",
+
+  "comfortable","available","necessary","possible","impossible","similar","different","correct","incorrect","serious",
+  "basic","common","general","specific","simple","complex","modern","traditional","natural","usual",
+  "confident","polite","honest","creative","careful","powerful","peaceful","useful","friendly","healthy",
+
+  "choice","decision","experience","opinion","problem","solution","reason","example","situation","conversation",
+  "message","question","answer","explanation","relationship","information","knowledge","improvement","progress","opportunity",
+  "success","failure","difference","purpose","method",
+
+  "get along","hang out","calm down","cheer up","grow up","work out","figure out","show up","set up","break down",
+  "carry on","find out","run into","look up","come across","take care of","think about","look forward to","sort out","move on",
+  "pay attention","take part","deal with","check out","hold on"
+],
+  advanced: [
+  "analyze","evaluate","interpret","identify","explain","define","describe","summarize","clarify","discuss",
+  "support","challenge","measure","compare","contrast","select","demonstrate","establish","maintain","achieve",
+
+  "require","provide","include","involve","affect","influence","depend","relate","indicate","suggest",
+  "improve","develop","increase","reduce","avoid","prepare","organize","manage","maintain","acquire",
+
+  "predict","assume","consider","reflect","imply","reveal","express","represent","emphasize","highlight",
+  "confirm","debate","question","justify","argue","propose","recommend","conclude","summarize","define",
+
+  "significant","essential","appropriate","relevant","accurate","reliable","effective","efficient","complex","simple",
+  "specific","general","formal","informal","logical","typical","reasonable","practical","professional","traditional",
+
+  "structure","function","process","method","system","context","purpose","effect","result","evidence",
+  "data","research","knowledge","skill","ability","resource","material","example","model","theory",
+
+  "responsibility","opportunity","challenge","advantage","disadvantage","limit","goal","priority","strategy","category",
+  "agreement","argument","perspective","relationship","contrast","connection","impact","conclusion","discussion","interpretation",
+
+  "carry out","point out","set up","find out","focus on","deal with","refer to","rely on","result in","lead to",
+  "look into","work on","based on","according to","come up with","break down","go over","take on","fill in","go through","turn out","make up"
+],
+  master: [
+  "serene","tranquil","calm","gentle","tender","delicate","fragile","graceful","elegant","subtle",
+  "vivid","radiant","luminous","glowing","vibrant","brilliant","dazzling","faint","dim","shadowy",
+
+  "profound","meaningful","significant","deep","thoughtful","reflective","introspective","contemplative","philosophical","spiritual",
+  "mysterious","enigmatic","uncertain","ambiguous","elusive","fleeting","temporary","momentary","eternal","endless",
+
+  "sacred","precious","beloved","cherished","dear","intimate","personal","distant","detached","reserved",
+  "fierce","passionate","intense","ardent","eager","yearning","longing","wistful","nostalgic","melancholic",
+
+  "courage","honor","virtue","hope","faith","purpose","destiny","fate","freedom","justice",
+  "wisdom","insight","vision","clarity","wonder","gratitude","awe","reverence","compassion","mercy",
+
+  "endure","persevere","overcome","transcend","embrace","surrender","restore","awaken","transform","illuminate",
+  "wander","roam","linger","dwell","unfold","emerge","bloom","blossom","fade","wither",
+
+  "whisper","murmur","echo","resonate","soar","ascend","descend","vanish","dissolve","linger",
+  "glisten","shimmer","sparkle","tremble","quiver","shiver","hesitate","pause","remain","linger",
+
+  "solitude","silence","stillness","presence","essence","memory","dream","vision","truth","beauty",
+  "sorrow","joy","grief","delight","rapture","calm","chaos","balance","harmony","contrast",
+
+  "carry on","hold on","let go","rise up","fall apart","break through","come undone","grow beyond","start over","begin again"
+]
 };
 
 let history = JSON.parse(localStorage.getItem("history_words")) || [];
