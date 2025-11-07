@@ -129,7 +129,72 @@ document.getElementById("favBtn").onclick = function(){
   alert("Saved! (Favorites are stored on this device)");
 };
 
-newWord();
+async function newWord() {
+  const lvl = document.getElementById("level").value;
+  const pool = words[lvl];
+  const chosen = pool[Math.floor(Math.random() * pool.length)];
+
+  // Fetch definition from dictionary API
+  const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${chosen}`);
+  const data = await res.json();
+
+  const entry = data[0];
+  const meaning = entry.meanings[0];
+  const definition = meaning.definitions[0].definition;
+
+  // Check for examples from dictionary
+  let examples = [];
+  if (meaning.definitions[0].example) {
+    examples = [meaning.definitions[0].example];
+  } else {
+    // If none exist → generate natural examples
+    examples = [
+      makeExample(entry.word, meaning.partOfSpeech),
+      makeExample(entry.word, meaning.partOfSpeech),
+      makeExample(entry.word, meaning.partOfSpeech)
+    ];
+  }
+
+  // Build our display object
+  currentWord = {
+    word: entry.word,
+    type: meaning.partOfSpeech,
+    def: definition,
+    ex: examples
+  };
+
+  // Save to history
+  history.push(currentWord.word);
+  localStorage.setItem("history_words", JSON.stringify(history));
+
+  displayWord();
+}
+  function makeExample(word, type) {
+  const templates = {
+    noun: [
+      `I saw a ${word} today.`,
+      `The ${word} was on the table.`,
+      `She talked about the ${word} in class.`
+    ],
+    verb: [
+      `I will ${word} later.`,
+      `They decided to ${word} together.`,
+      `Try to ${word} if you can.`
+      ],
+    adjective: [
+      `The weather is very ${word} today.`,
+      `She seems ${word} this morning.`,
+      `That was a ${word} idea.`
+    ],
+    default: [
+      `This is an example using the word "${word}".`
+    ]
+  };
+
+  return (templates[type] || templates.default)[
+    Math.floor(Math.random() * (templates[type] || templates.default).length)
+  ];
+}
 </script>
 
 </body>
