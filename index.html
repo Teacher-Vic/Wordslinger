@@ -230,16 +230,47 @@ function displayWord() {
 /* FAVORITES */
 function renderFavorites() {
   const list = document.getElementById("favoritesList");
-  if(favorites.length === 0){
+
+  if (favorites.length === 0) {
     list.innerHTML = "(No favorites yet)";
     return;
   }
-  list.innerHTML = favorites.map(w => `
-    <div class="favorite-item">
-      <span>${w}</span>
-      <button onclick="removeFavorite('${w}')">Remove</button>
-    </div>
-  `).join("");
+
+  list.innerHTML = "Loading favorites...";
+
+  const cards = [];
+
+  for (let word of favorites) {
+    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+    const data = await res.json();
+    const entry = data[0];
+    const meaning = entry.meanings[0];
+
+    // Definition + Examples (same fallback logic)
+    const definition = meaning.definitions[0].definition;
+    let examples = [];
+    entry.meanings.forEach(m => m.definitions.forEach(d => { if(d.example) examples.push(d.example); }));
+    if (examples.length === 0) {
+      examples = [
+        makeExample(entry.word, meaning.partOfSpeech),
+        makeExample(entry.word, meaning.partOfSpeech),
+        makeExample(entry.word, meaning.partOfSpeech)
+      ];
+    }
+
+    cards.push(`
+      <div class="word-box" style="position:relative;">
+        <strong>Word:</strong> ${entry.word}<br>
+        <strong>Part of Speech:</strong> ${meaning.partOfSpeech}<br>
+        <strong>Definition:</strong> ${definition}<br><br>
+        <strong>Examples:</strong><br>
+        ${examples.slice(0,3).map(e => `<div class="example">• ${e}</div>`).join("")}
+        <button class="removeBtn" onclick="removeFavorite('${word}')">🗑</button>
+      </div>
+    `);
+  }
+
+  list.innerHTML = cards.join("");
 }
 
 function removeFavorite(word){
