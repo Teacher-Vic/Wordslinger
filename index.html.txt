@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Wordslinger</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #faf9f6;
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+  color: #222;
+}
+h1 { text-align: center; }
+select, button {
+  font-size: 16px;
+  padding: 10px;
+  margin: 8px 0;
+  width: 100%;
+}
+.word-box {
+  background: white;
+  border-radius: 10px;
+  padding: 18px;
+  margin-top: 15px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+}
+.example {
+  margin-left: 15px;
+  opacity: 0.9;
+}
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.buttons button {
+  width: 48%;
+}
+</style>
+</head>
+<body>
+
+<h1>Wordslinger</h1>
+
+<label>Choose Level:</label>
+<select id="level">
+  <option value="beginner">Beginner</option>
+  <option value="journey">Journey</option>
+  <option value="advanced">Advanced</option>
+  <option value="master">Master</option>
+</select>
+
+<div class="word-box" id="display"></div>
+
+<div class="buttons">
+  <button id="favBtn">Save Word</button>
+  <button id="newBtn">New Word</button>
+</div>
+
+<script>
+// --- WORD BANK (you can expand freely) ---
+
+const words = {
+  beginner: [
+    {word:"apple", type:"noun",
+    def:"A round fruit that is typically red or green.",
+    ex:["I ate an apple for lunch.","The apple fell from the tree.","She likes apple juice."]},
+
+    {word:"happy", type:"adjective",
+    def:"Feeling or showing pleasure or contentment.",
+    ex:["I am happy to see you.","He had a happy childhood.","This music makes me happy."]}
+  ],
+
+  journey: [
+    {word:"wander", type:"verb",
+    def:"To walk or move around without a clear purpose or direction.",
+    ex:["They like to wander through old streets.","My mind began to wander during class.","We wandered without a map."]}
+  ],
+
+  advanced: [
+    {word:"meticulous", type:"adjective",
+    def:"Showing great attention to detail; very careful and precise.",
+    ex:["She was meticulous in her research.","A meticulous baker measures everything.","He keeps meticulous notes."]}
+  ],
+
+  master: [
+    {word:"serendipity", type:"noun",
+    def:"The occurrence of events by chance in a happy or beneficial way.",
+    ex:[
+    "“Some of the greatest discoveries in science have come about through serendipity.”",
+    "Meeting her was pure serendipity.",
+    "Traveling without plans invites serendipity."
+    ]}
+  ]
+};
+
+// --- STATE MANAGEMENT ---
+
+let history = JSON.parse(localStorage.getItem("history_words")) || [];
+let favorites = JSON.parse(localStorage.getItem("favorite_words")) || [];
+let currentWord = null;
+
+function newWord() {
+  const lvl = document.getElementById("level").value;
+  const pool = words[lvl];
+  currentWord = pool[Math.floor(Math.random() * pool.length)];
+  history.push(currentWord.word);
+  localStorage.setItem("history_words", JSON.stringify(history));
+  displayWord();
+}
+
+function displayWord() {
+  const box = document.getElementById("display");
+  if (!currentWord) return;
+  box.innerHTML = `
+    <strong>Word:</strong> ${currentWord.word}<br>
+    <strong>Level:</strong> ${document.getElementById("level").value}<br>
+    <strong>Part of Speech:</strong> ${currentWord.type}<br>
+    <strong>Definition:</strong> ${currentWord.def}<br><br>
+    <strong>Examples:</strong><br>
+    ${currentWord.ex.map(e => `<div class="example">• ${e}</div>`).join("")}
+  `;
+}
+
+document.getElementById("newBtn").onclick = newWord;
+
+document.getElementById("favBtn").onclick = function(){
+  if (!currentWord) return;
+  if (!favorites.includes(currentWord.word)) favorites.push(currentWord.word);
+  localStorage.setItem("favorite_words", JSON.stringify(favorites));
+  alert("Saved! (Favorites are stored on this device)");
+};
+
+// Auto-generate first word on load
+newWord();
+</script>
+
+</body>
+</html>
