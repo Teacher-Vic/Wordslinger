@@ -277,27 +277,31 @@ async function newWord() {
     const data = await res.json();
     const entry = data[0];
 
-    // Collect all definitions
-    let definitions = [];
-    let examples = [];
-    entry.meanings.forEach(m => {
-      m.definitions.forEach(d => {
-        if(d.definition) definitions.push(`${m.partOfSpeech}: ${d.definition}`);
-        if(d.example) examples.push(d.example);
-      });
-    });
+    // Only keep meanings that are noun, verb, or adjective
+    const validTypes = ["noun", "verb", "adjective"];
+    const filteredMeanings = entry.meanings.filter(m => validTypes.includes(m.partOfSpeech));
 
-    // fallback examples if none
-    if (examples.length === 0) {
-      const type = entry.meanings[0]?.partOfSpeech || "default";
-      examples = [makeExample(entry.word,type), makeExample(entry.word,type), makeExample(entry.word,type)];
+    let type, definition, examples;
+
+    if (filteredMeanings.length > 0) {
+      // pick a random valid meaning
+      const meaning = filteredMeanings[Math.floor(Math.random() * filteredMeanings.length)];
+      type = meaning.partOfSpeech;
+      definition = meaning.definitions[0].definition;
+
+      examples = [];
+      filteredMeanings.forEach(m => m.definitions.forEach(d => { if(d.example) examples.push(d.example) }));
+      if (examples.length === 0) {
+        examples = [makeExample(entry.word, type), makeExample(entry.word, type), makeExample(entry.word, type)];
+      }
+    } else {
+      // fallback if no noun/verb/adjective
+      type = "unknown";
+      definition = "No definition available";
+      examples = [makeExample(entry.word, "default")];
     }
 
-    currentWord = { 
-      word: entry.word, 
-      definitions, 
-      ex: examples.slice(0,3) 
-    };
+    currentWord = { word: entry.word, type, def: definition, ex: examples.slice(0,3) };
     history.push(currentWord.word);
     localStorage.setItem("history_words", JSON.stringify(history));
     displayWord();
@@ -305,7 +309,7 @@ async function newWord() {
     const lvl = document.getElementById("level").value;
     const pool = words[lvl];
     const chosen = pool[Math.floor(Math.random() * pool.length)];
-    currentWord = { word: chosen, definitions: ["No definition available"], ex: [makeExample(chosen,"default")] };
+    currentWord = { word: chosen, type: "unknown", def: "No definition available", ex: [makeExample(chosen, "default")] };
     displayWord();
   }
 }
