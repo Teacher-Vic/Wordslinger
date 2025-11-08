@@ -278,56 +278,50 @@ async function newWord() {
     const data = await res.json();
     const entry = data[0];
 
-    // Filter meanings for noun, verb, or adjective
-    const validTypes = ["noun", "verb", "adjective"];
+    // Filter meanings for noun, verb, adjective
+    const validTypes = ["noun","verb","adjective"];
     const filteredMeanings = entry.meanings.filter(m => validTypes.includes(m.partOfSpeech));
 
-    // Collect all valid definitions
     let definitions = [];
     filteredMeanings.forEach(m => {
-      m.definitions.forEach(d => {
-        if(d.definition) definitions.push({
-          def: d.definition,
-          type: m.partOfSpeech,
-          examples: d.example ? [d.example] : null
-        });
-      });
+      m.definitions.forEach(d => definitions.push({def: d.definition, type: m.partOfSpeech}));
     });
 
-    // Fallback if no valid definitions found
+    // If no valid definitions, fallback
     if(definitions.length === 0) {
-      definitions = [{def: "No definition available", type: "default", examples: [makeExample(entry.word,"default")]}];
+      definitions = [{def: "No definition available", type: "unknown"}];
     }
 
-    // Check if word was shown before to cycle definitions
-    let lastIndex = 0;
-    if(currentWord && currentWord.word === entry.word && currentWord.lastDefIndex !== undefined) {
-      lastIndex = (currentWord.lastDefIndex + 1) % definitions.length;
+    // Cycle index
+    let defIndex = entry.definitionIndex || 0;
+    const chosenDef = definitions[defIndex];
+    entry.definitionIndex = (defIndex + 1) % definitions.length; // save next index for next time
+
+    // Examples
+    let examples = [];
+    filteredMeanings.forEach(m => m.definitions.forEach(d => { if(d.example) examples.push(d.example) }));
+    if(examples.length === 0) {
+      examples = [makeExample(entry.word, chosenDef.type), makeExample(entry.word, chosenDef.type), makeExample(entry.word, chosenDef.type)];
     }
 
     currentWord = {
       word: entry.word,
-      definitions: definitions,
-      lastDefIndex: lastIndex,
-      def: definitions[lastIndex].def,
-      type: definitions[lastIndex].type,
-      ex: definitions[lastIndex].examples || [
-        makeExample(entry.word, definitions[lastIndex].type),
-        makeExample(entry.word, definitions[lastIndex].type),
-        makeExample(entry.word, definitions[lastIndex].type)
-      ]
+      type: chosenDef.type,
+      def: chosenDef.def,
+      ex: examples.slice(0,3),
+      definitions,        // store all for cycling
+      definitionIndex: entry.definitionIndex
     };
 
-    // Update history
     history.push(currentWord.word);
     localStorage.setItem("history_words", JSON.stringify(history));
     displayWord();
-
   } catch(err) {
+    // fallback for API failure
     const lvl = document.getElementById("level").value;
     const pool = words[lvl];
     const chosen = pool[Math.floor(Math.random() * pool.length)];
-    currentWord = { word: chosen, type: "unknown", def: "No definition available", ex: [makeExample(chosen, "default")], lastDefIndex: 0 };
+    currentWord = { word: chosen, type: "unknown", def: "No definition available", ex: [makeExample(chosen,"default")], definitions:[{def:"No definition available", type:"unknown"}], definitionIndex:0 };
     displayWord();
   }
 }
@@ -335,19 +329,13 @@ async function newWord() {
 
 function displayWord() {
   const box = document.getElementById("display");
-
-  // Ensure we get the current definition
-  const activeDef = currentWord.definitions
-    ? currentWord.definitions[currentWord.lastDefIndex]
-    : { def: currentWord.def, type: currentWord.type, examples: currentWord.ex };
-
   box.innerHTML = `
     <strong>Word:</strong> ${currentWord.word}<br>
     <strong>Level:</strong> ${document.getElementById("level").value}<br>
-    <strong>Part of Speech:</strong> ${activeDef.type}<br>
-    <strong>Definition:</strong> ${activeDef.def}<br><br>
+    <strong>Part of Speech:</strong> ${currentWord.type}<br>
+    <strong>Definition:</strong> ${currentWord.def}<br><br>
     <strong>Examples:</strong><br>
-    ${activeDef.examples.map(e => `<div class="example">• ${e}</div>`).join("")}
+    ${currentWord.ex.map(e=>`<div class="example">• ${e}</div>`).join("")}
   `;
 }
 
@@ -355,6 +343,7 @@ function displayWord() {
 document.getElementById("favBtn").onclick = function() {
   if (!currentWord) return;
   if (!favorites.find(f=>f.word===currentWord.word)) {
+    // Save the word as-is; current definition and type are preserved
     favorites.push({...currentWord});
     localStorage.setItem("favorite_words", JSON.stringify(favorites));
     alert("Added to favorites!");
