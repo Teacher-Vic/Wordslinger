@@ -280,38 +280,45 @@ async function newWord() {
 
     // Filter meanings for noun, verb, adjective
     const validTypes = ["noun", "verb", "adjective"];
-    const filteredMeanings = entry.meanings.filter(m => validTypes.includes(m.partOfSpeech));
-
     let definitions = [];
-    filteredMeanings.forEach(m => {
-      m.definitions.forEach(d => definitions.push({ def: d.definition, type: m.partOfSpeech, example: d.example }));
+    entry.meanings.forEach(m => {
+      if (validTypes.includes(m.partOfSpeech)) {
+        m.definitions.forEach(d => definitions.push({ def: d.definition, type: m.partOfSpeech, example: d.example }));
+      }
     });
 
-    // Fallback if no valid definitions
+    // If no valid definitions, fallback
     if (definitions.length === 0) {
       definitions = [{ def: "No definition available", type: "unknown", example: null }];
     }
 
-    // Determine which definition to show (cycle through)
-    let defIndex = currentWord?.definitionIndex || 0;
-    const chosenDef = definitions[defIndex];
-    defIndex = (defIndex + 1) % definitions.length; // prepare index for next cycle
+    // Use previous index if same word, otherwise start at 0
+    let defIndex = (currentWord && currentWord.word === chosen) ? currentWord.definitionIndex : 0;
 
-    // Build examples array
-    let examples = [];
-    definitions.forEach(d => { if(d.example) examples.push(d.example); });
+    // Pick the definition to show
+    const chosenDef = definitions[defIndex];
+
+    // Cycle index for next time
+    defIndex = (defIndex + 1) % definitions.length;
+
+    // Gather examples
+    let examples = definitions.filter(d => d.example).map(d => d.example);
     if (examples.length === 0) {
-      examples = [makeExample(entry.word, chosenDef.type), makeExample(entry.word, chosenDef.type), makeExample(entry.word, chosenDef.type)];
+      examples = [
+        makeExample(chosen, chosenDef.type),
+        makeExample(chosen, chosenDef.type),
+        makeExample(chosen, chosenDef.type)
+      ];
     }
 
     // Update currentWord
     currentWord = {
-      word: entry.word,
+      word: chosen,
       type: chosenDef.type,
       def: chosenDef.def,
-      ex: examples.slice(0, 3),
-      definitions,        // store all definitions for cycling
-      definitionIndex: defIndex // save next index for next time
+      ex: examples.slice(0,3),
+      definitions: definitions,
+      definitionIndex: defIndex // store next index for cycling
     };
 
     // Save history
@@ -330,7 +337,7 @@ async function newWord() {
       word: chosen,
       type: "unknown",
       def: "No definition available",
-      ex: [makeExample(chosen, "default")],
+      ex: [makeExample(chosen,"default")],
       definitions: [{ def: "No definition available", type: "unknown" }],
       definitionIndex: 0
     };
@@ -342,16 +349,20 @@ async function newWord() {
 
 function displayWord() {
   const box = document.getElementById("display");
+
+  const totalDefs = currentWord.definitions.length;
+  // Calculate current definition number (1-based)
+  const currentDefNumber = (currentWord.definitionIndex === 0 ? totalDefs : currentWord.definitionIndex);
+
   box.innerHTML = `
     <strong>Word:</strong> ${currentWord.word}<br>
     <strong>Level:</strong> ${document.getElementById("level").value}<br>
     <strong>Part of Speech:</strong> ${currentWord.type}<br>
-    <strong>Definition:</strong> ${currentWord.def}<br><br>
+    <strong>Definition (${currentDefNumber} of ${totalDefs}):</strong> ${currentWord.def}<br><br>
     <strong>Examples:</strong><br>
-    ${currentWord.ex.map(e=>`<div class="example">• ${e}</div>`).join("")}
+    ${currentWord.ex.map(e => `<div class="example">• ${e}</div>`).join("")}
   `;
 }
-
 // Favorite word
 document.getElementById("favBtn").onclick = function() {
   if (!currentWord) return;
