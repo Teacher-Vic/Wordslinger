@@ -279,49 +279,62 @@ async function newWord() {
     const entry = data[0];
 
     // Filter meanings for noun, verb, adjective
-    const validTypes = ["noun","verb","adjective"];
+    const validTypes = ["noun", "verb", "adjective"];
     const filteredMeanings = entry.meanings.filter(m => validTypes.includes(m.partOfSpeech));
 
     let definitions = [];
     filteredMeanings.forEach(m => {
-      m.definitions.forEach(d => definitions.push({def: d.definition, type: m.partOfSpeech}));
+      m.definitions.forEach(d => definitions.push({ def: d.definition, type: m.partOfSpeech, example: d.example }));
     });
 
-    // If no valid definitions, fallback
-    if(definitions.length === 0) {
-      definitions = [{def: "No definition available", type: "unknown"}];
+    // Fallback if no valid definitions
+    if (definitions.length === 0) {
+      definitions = [{ def: "No definition available", type: "unknown", example: null }];
     }
 
-    // Cycle index
-    let defIndex = entry.definitionIndex || 0;
+    // Determine which definition to show (cycle through)
+    let defIndex = currentWord?.definitionIndex || 0;
     const chosenDef = definitions[defIndex];
-    entry.definitionIndex = (defIndex + 1) % definitions.length; // save next index for next time
+    defIndex = (defIndex + 1) % definitions.length; // prepare index for next cycle
 
-    // Examples
+    // Build examples array
     let examples = [];
-    filteredMeanings.forEach(m => m.definitions.forEach(d => { if(d.example) examples.push(d.example) }));
-    if(examples.length === 0) {
+    definitions.forEach(d => { if(d.example) examples.push(d.example); });
+    if (examples.length === 0) {
       examples = [makeExample(entry.word, chosenDef.type), makeExample(entry.word, chosenDef.type), makeExample(entry.word, chosenDef.type)];
     }
 
+    // Update currentWord
     currentWord = {
       word: entry.word,
       type: chosenDef.type,
       def: chosenDef.def,
-      ex: examples.slice(0,3),
-      definitions,        // store all for cycling
-      definitionIndex: entry.definitionIndex
+      ex: examples.slice(0, 3),
+      definitions,        // store all definitions for cycling
+      definitionIndex: defIndex // save next index for next time
     };
 
+    // Save history
     history.push(currentWord.word);
     localStorage.setItem("history_words", JSON.stringify(history));
+
     displayWord();
+
   } catch(err) {
-    // fallback for API failure
+    // Fallback if API fails
     const lvl = document.getElementById("level").value;
     const pool = words[lvl];
     const chosen = pool[Math.floor(Math.random() * pool.length)];
-    currentWord = { word: chosen, type: "unknown", def: "No definition available", ex: [makeExample(chosen,"default")], definitions:[{def:"No definition available", type:"unknown"}], definitionIndex:0 };
+
+    currentWord = {
+      word: chosen,
+      type: "unknown",
+      def: "No definition available",
+      ex: [makeExample(chosen, "default")],
+      definitions: [{ def: "No definition available", type: "unknown" }],
+      definitionIndex: 0
+    };
+
     displayWord();
   }
 }
