@@ -277,35 +277,32 @@ async function newWord() {
     const data = await res.json();
     const entry = data[0];
 
-    // Only keep meanings that are noun, verb, or adjective
+    // Filter meanings for noun, verb, or adjective
     const validTypes = ["noun", "verb", "adjective"];
     const filteredMeanings = entry.meanings.filter(m => validTypes.includes(m.partOfSpeech));
 
-    let type, definition, examples;
-
+    // Use first valid meaning, or fallback
+    let meaning;
     if (filteredMeanings.length > 0) {
-      // pick a random valid meaning
-      const meaning = filteredMeanings[Math.floor(Math.random() * filteredMeanings.length)];
-      type = meaning.partOfSpeech;
-      definition = meaning.definitions[0].definition;
-
-      examples = [];
-      filteredMeanings.forEach(m => m.definitions.forEach(d => { if(d.example) examples.push(d.example) }));
-      if (examples.length === 0) {
-        examples = [makeExample(entry.word, type), makeExample(entry.word, type), makeExample(entry.word, type)];
-      }
+      meaning = filteredMeanings[0];
     } else {
-      // fallback if no noun/verb/adjective
-      type = "unknown";
-      definition = "No definition available";
-      examples = [makeExample(entry.word, "default")];
+      meaning = entry.meanings[0] || { partOfSpeech: "unknown", definitions: [{ definition: "No definition available" }] };
     }
 
-    currentWord = { word: entry.word, type, def: definition, ex: examples.slice(0,3) };
+    const type = validTypes.includes(meaning.partOfSpeech) ? meaning.partOfSpeech : "default";
+    const definition = meaning.definitions[0]?.definition || "No definition available";
+
+    let examples = [];
+    entry.meanings.forEach(m => m.definitions.forEach(d => { if(d.example) examples.push(d.example) }));
+    if (examples.length === 0) {
+      examples = [makeExample(entry.word, type), makeExample(entry.word, type), makeExample(entry.word, type)];
+    }
+
+    currentWord = { word: entry.word, type, def: definition, ex: examples.slice(0, 3) };
     history.push(currentWord.word);
     localStorage.setItem("history_words", JSON.stringify(history));
     displayWord();
-  } catch(err) {
+  } catch (err) {
     const lvl = document.getElementById("level").value;
     const pool = words[lvl];
     const chosen = pool[Math.floor(Math.random() * pool.length)];
