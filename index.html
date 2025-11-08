@@ -265,7 +265,8 @@ function makeExample(word, type) {
 }
 
 // Fetch a new word
-// Fetch a new word (with cycling definitions)
+let wordIndexes = JSON.parse(localStorage.getItem("definitionIndexes") || "{}");
+
 async function newWord() {
   try {
     const lvl = document.getElementById("level").value;
@@ -278,70 +279,57 @@ async function newWord() {
     const data = await res.json();
     const entry = data[0];
 
-    // Filter meanings for noun, verb, adjective
-    const validTypes = ["noun", "verb", "adjective"];
+    const validTypes = ["noun","verb","adjective"];
     let definitions = [];
     entry.meanings.forEach(m => {
-      if (validTypes.includes(m.partOfSpeech)) {
-        m.definitions.forEach(d => definitions.push({ def: d.definition, type: m.partOfSpeech, example: d.example }));
+      if(validTypes.includes(m.partOfSpeech)){
+        m.definitions.forEach(d => definitions.push({def: d.definition, type: m.partOfSpeech, example: d.example}));
       }
     });
-
-    // If no valid definitions, fallback
-    if (definitions.length === 0) {
-      definitions = [{ def: "No definition available", type: "unknown", example: null }];
+    if(definitions.length === 0){
+      definitions = [{def: "No definition available", type: "unknown", example: null}];
     }
 
-    // Use previous index if same word, otherwise start at 0
-    let defIndex = (currentWord && currentWord.word === chosen) ? currentWord.definitionIndex : 0;
-
-    // Pick the definition to show
+    // Use stored index for this word, default to 0
+    let defIndex = wordIndexes[chosen] || 0;
     const chosenDef = definitions[defIndex];
 
     // Cycle index for next time
-    defIndex = (defIndex + 1) % definitions.length;
+    wordIndexes[chosen] = (defIndex + 1) % definitions.length;
+    localStorage.setItem("definitionIndexes", JSON.stringify(wordIndexes));
 
-    // Gather examples
+    // Examples
     let examples = definitions.filter(d => d.example).map(d => d.example);
-    if (examples.length === 0) {
-      examples = [
-        makeExample(chosen, chosenDef.type),
-        makeExample(chosen, chosenDef.type),
-        makeExample(chosen, chosenDef.type)
-      ];
+    if(examples.length === 0){
+      examples = [makeExample(chosen, chosenDef.type), makeExample(chosen, chosenDef.type), makeExample(chosen, chosenDef.type)];
     }
 
-    // Update currentWord
     currentWord = {
       word: chosen,
       type: chosenDef.type,
       def: chosenDef.def,
       ex: examples.slice(0,3),
       definitions: definitions,
-      definitionIndex: defIndex // store next index for cycling
+      definitionIndex: wordIndexes[chosen]
     };
 
-    // Save history
     history.push(currentWord.word);
     localStorage.setItem("history_words", JSON.stringify(history));
-
     displayWord();
 
   } catch(err) {
-    // Fallback if API fails
+    // fallback
     const lvl = document.getElementById("level").value;
     const pool = words[lvl];
     const chosen = pool[Math.floor(Math.random() * pool.length)];
-
     currentWord = {
       word: chosen,
       type: "unknown",
       def: "No definition available",
       ex: [makeExample(chosen,"default")],
-      definitions: [{ def: "No definition available", type: "unknown" }],
+      definitions: [{def:"No definition available", type:"unknown"}],
       definitionIndex: 0
     };
-
     displayWord();
   }
 }
