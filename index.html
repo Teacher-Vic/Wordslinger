@@ -177,14 +177,12 @@ footer {
   font-size: 14px;
 }
 
-/* ===================== Mobile Tweaks ===================== */
+/* Small responsive tweaks */
 @media (max-width:480px) {
   body { padding: 12px; max-width: 92%; }
   h1 { font-size: 34px; }
   .buttons { flex-direction: column; }
   .buttons button { width: 100%; margin-bottom:8px; }
-  nav button { margin: 6px 0; width: 100%; }
-  #quizOptions button { font-size: 14px; padding: 8px; }
 }
 </style>
 </head>
@@ -240,7 +238,7 @@ footer {
 <footer>By Teacher Vic</footer>
 
 <script>
-// ===================== Full Words Database =====================
+// ===================== Data =====================
 const words = {
   beginner: ["apple","water","bread","house","school","teacher","student","family","friend","city","morning","night","day","week","month","year","time","place","world","story","book","movie","music","game","phone","table","chair","door","window","floor","smile","laugh","cry","think","learn","understand","remember","forget","hope","help","use","work","play","move","open","close","carry","send","bring","look","watch","listen","hear","speak","say","tell","ask","answer","call","run","walk","sit","stand","sleep","wake","eat","drink","cook","clean","fast","slow","easy","hard","big","small","short","long","high","low","happy","sad","angry","tired","hungry","thirsty","warm","cold","bright","dark","good","bad","new","old","young","early","late","ready","sure","true","pick up","put down","turn on","turn off","look for","look at","look after","sit down","stand up","wake up","come back","go out","give up","take off","bring back","carry on","find out","run out","get up","get in","get out","take away","put back","come in","hold on"],
   journey: ["travel","visit","arrive","leave","return","stay","reach","plan","decide","choose","prefer","enjoy","remember","remind","consider","realize","guess","notice","wonder","believe","explain","describe","discuss","suggest","recommend","promise","agree","refuse","accept","invite","borrow","lend","spend","save","earn","share","improve","develop","create","build","change","continue","repeat","avoid","protect","allow","support","prevent","prepare","organize","compare","connect","include","contain","control","reduce","increase","measure","achieve","complete","comfortable","available","necessary","possible","impossible","similar","different","correct","incorrect","serious","basic","common","general","specific","simple","complex","modern","traditional","natural","usual","confident","polite","honest","creative","careful","powerful","peaceful","useful","friendly","healthy","choice","decision","experience","opinion","problem","solution","reason","example","situation","conversation","message","question","answer","explanation","relationship","information","knowledge","improvement","progress","opportunity","success","failure","difference","purpose","method","get along","hang out","calm down","cheer up","grow up","work out","figure out","show up","set up","break down","carry on","find out","run into","look up","come across","take care of","think about","look forward to","sort out","move on","pay attention","take part","deal with","check out","hold on"],
@@ -248,8 +246,194 @@ const words = {
   master: ["serene","tranquil","calm","gentle","tender","delicate","fragile","graceful","elegant","subtle","vivid","radiant","luminous","glowing","vibrant","brilliant","dazzling","faint","dim","shadowy","profound","meaningful","significant","deep","thoughtful","reflective","introspective","contemplative","philosophical","spiritual","mysterious","enigmatic","uncertain","ambiguous","elusive","fleeting","temporary","momentary","eternal","endless","sacred","precious","beloved","cherished","dear","intimate","personal","distant","detached","reserved","fierce","passionate","intense","ardent","eager","yearning","longing","wistful","nostalgic","melancholic","courage","honor","virtue","hope","faith","purpose","destiny","fate","freedom","justice","wisdom","insight","vision","clarity","wonder","gratitude","awe","reverence","compassion","mercy","endure","persevere","overcome","transcend","embrace","surrender","restore","awaken","transform","illuminate","wander","roam","linger","dwell","unfold","emerge","bloom","blossom","fade","wither","whisper","murmur","echo","resonate","soar","ascend","descend","vanish","dissolve","linger","glisten","shimmer","sparkle","tremble","quiver","shiver","hesitate","pause","remain","linger","solitude","silence","stillness","presence","essence","memory","dream","vision","truth","beauty","sorrow","joy","grief","delight","rapture","calm","chaos","balance","harmony","contrast","carry on","hold on","let go","rise up","fall apart","break through","come undone","grow beyond","start over","begin again"]
 };
 
-// ===================== Rest of your JS code remains exactly as before =====================
-// (all functions: newWord, displayWord, favorites, quiz, navigation, initial load...)
+let history = JSON.parse(localStorage.getItem("history_words")) || [];
+let favorites = JSON.parse(localStorage.getItem("favorite_words")) || [];
+let currentWord = null;
+
+// ===================== Functions =====================
+
+// Example generator
+function makeExample(word, type) {
+  const templates = {
+    noun: [`I saw a ${word} today.`,`The ${word} was on the table.`,`She talked about the ${word} in class.`],
+    verb: [`I will ${word} later.`,`They decided to ${word} together.`,`Try to ${word} if you can.`],
+    adjective: [`The weather is very ${word} today.`,`She seems ${word} this morning.`,`That was a ${word} idea.`],
+    default: [`This is an example using the word "${word}".`]
+  };
+  const group = templates[type] || templates.default;
+  return group[Math.floor(Math.random() * group.length)];
+}
+
+// Fetch a new word
+async function newWord() {
+  try {
+    const lvl = document.getElementById("level").value;
+    const pool = words[lvl];
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
+
+    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${chosen}`);
+    if (!res.ok) throw new Error("Word not found");
+
+    const data = await res.json();
+    const entry = data[0];
+
+    const meaning = entry.meanings[0];
+    const validTypes = ["noun","verb","adjective"];
+    const type = validTypes.includes(meaning.partOfSpeech) ? meaning.partOfSpeech : "default";
+    const definition = meaning.definitions[0].definition;
+
+    let examples = [];
+    entry.meanings.forEach(m => m.definitions.forEach(d => { if(d.example) examples.push(d.example) }));
+    if (examples.length === 0) {
+      examples = [makeExample(entry.word,type), makeExample(entry.word,type), makeExample(entry.word,type)];
+    }
+
+    currentWord = { word: entry.word, type, def: definition, ex: examples.slice(0,3) };
+    history.push(currentWord.word);
+    localStorage.setItem("history_words", JSON.stringify(history));
+    displayWord();
+  } catch(err) {
+    const lvl = document.getElementById("level").value;
+    const pool = words[lvl];
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
+    currentWord = { word: chosen, type: "unknown", def: "No definition available", ex: [makeExample(chosen,"default")] };
+    displayWord();
+  }
+}
+
+// Display word on home
+function displayWord() {
+  const box = document.getElementById("display");
+  box.innerHTML = `
+    <strong>Word:</strong> ${currentWord.word}<br>
+    <strong>Level:</strong> ${document.getElementById("level").value}<br>
+    <strong>Part of Speech:</strong> ${currentWord.type}<br>
+    <strong>Definition:</strong> ${currentWord.def}<br><br>
+    <strong>Examples:</strong><br>
+    ${currentWord.ex.map(e=>`<div class="example">• ${e}</div>`).join("")}
+  `;
+}
+
+// Favorite word
+document.getElementById("favBtn").onclick = function() {
+  if (!currentWord) return;
+  if (!favorites.find(f=>f.word===currentWord.word)) {
+    favorites.push({...currentWord});
+    localStorage.setItem("favorite_words", JSON.stringify(favorites));
+    alert("Added to favorites!");
+    if(document.getElementById("favoritesPage").style.display === "block") showFavorites();
+  } else {
+    alert("This word is already in favorites!");
+  }
+}
+
+// Show favorites
+function showFavorites() {
+  const list = document.getElementById("favoritesList");
+  list.innerHTML = "";
+  if(favorites.length===0){ list.innerHTML="No favorites yet."; return; }
+  favorites.forEach((f,i)=>{
+    const card = document.createElement("div");
+    card.className="favorite-card";
+    card.innerHTML=`
+      <span class="delete-btn">&#128465;</span>
+      <strong>Word:</strong> ${f.word}<br>
+      <strong>Part of Speech:</strong> ${f.type}<br>
+      <strong>Definition:</strong> ${f.def}<br><br>
+      <strong>Examples:</strong><br>
+      ${f.ex.map(e=>`<div class="example">• ${e}</div>`).join("")}
+    `;
+    card.querySelector(".delete-btn").addEventListener("click", ()=>deleteFavorite(i));
+    list.appendChild(card);
+  });
+}
+
+// Delete favorite
+function deleteFavorite(index) {
+  favorites.splice(index,1);
+  localStorage.setItem("favorite_words", JSON.stringify(favorites));
+  showFavorites();
+}
+
+// ===================== Quiz Feature =====================
+let quizWord = null;
+
+function generateQuiz() {
+  const lvl = document.getElementById("quizLevel").value;
+  const pool = words[lvl];
+  const correctWord = pool[Math.floor(Math.random()*pool.length)];
+
+  let optionsSet = new Set();
+  optionsSet.add(correctWord);
+  while(optionsSet.size<3){
+    const w = pool[Math.floor(Math.random()*pool.length)];
+    optionsSet.add(w);
+  }
+  const options = [...optionsSet].sort(()=>Math.random()-0.5);
+
+  fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${correctWord}`)
+    .then(res=>res.ok?res.json():Promise.reject())
+    .then(data=>{
+      const entry = data[0];
+      const meaning = entry.meanings[0];
+      const def = meaning?.definitions[0]?.definition || "No definition available";
+      quizWord = { word: correctWord, def };
+
+      document.getElementById("quizBox").innerHTML=`<strong>Definition:</strong> ${quizWord.def}`;
+      const optionsDiv = document.getElementById("quizOptions");
+      optionsDiv.innerHTML="";
+      options.forEach(o=>{
+        const btn=document.createElement("button");
+        btn.innerText=o;
+        btn.onclick=()=>checkAnswer(o);
+        optionsDiv.appendChild(btn);
+      });
+      document.getElementById("nextQuizBtn").style.display="none";
+    })
+    .catch(err=>{
+      quizWord={word:correctWord,def:"No definition available"};
+      document.getElementById("quizBox").innerHTML=`<strong>Definition:</strong> ${quizWord.def}`;
+    });
+}
+
+function checkAnswer(selected){
+  const optionsDiv=document.getElementById("quizOptions");
+  optionsDiv.querySelectorAll("button").forEach(b=>b.disabled=true);
+  if(selected===quizWord.word){
+    optionsDiv.innerHTML+=`<div style="color:green;margin-top:10px;">Correct! ✅</div>`;
+  } else {
+    optionsDiv.innerHTML+=`<div style="color:red;margin-top:10px;">Wrong! ❌ Correct: ${quizWord.word}</div>`;
+  }
+  document.getElementById("nextQuizBtn").style.display="block";
+}
+
+// ===================== Navigation =====================
+document.getElementById("homeBtn").onclick=()=>{
+  document.getElementById("homePage").style.display="block";
+  document.getElementById("favoritesPage").style.display="none";
+  document.getElementById("quizPage").style.display="none";
+}
+
+document.getElementById("favoritesBtn").onclick=()=>{
+  document.getElementById("homePage").style.display="none";
+  document.getElementById("favoritesPage").style.display="block";
+  document.getElementById("quizPage").style.display="none";
+  showFavorites();
+}
+
+document.getElementById("quizBtn").onclick=()=>{
+  document.getElementById("homePage").style.display="none";
+  document.getElementById("favoritesPage").style.display="none";
+  document.getElementById("quizPage").style.display="block";
+  generateQuiz();
+}
+
+document.getElementById("newBtn").onclick=newWord;
+document.getElementById("nextQuizBtn").onclick=generateQuiz;
+document.getElementById("quizLevel").onchange=generateQuiz;
+
+// ===================== Initial Load =====================
+newWord();
 </script>
 
 </body>
