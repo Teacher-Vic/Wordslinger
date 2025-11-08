@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>The Wordslinger</title>
+<style>
+/* ===================== General Styles ===================== */
+body {
+  font-family: "Bookman Old Style", "Times New Roman", serif;
+  background: #f5e6d3;
+  padding: 20px;
+  max-width: 650px;
+  margin: auto;
+  color: #3e2f1c;
+}
+
+/* Header / Saloon style */
+h1 {
+  font-family: "Alfa Slab One", "Times New Roman", serif;
+  font-size: 48px;
+  text-align: center;
+  color: #6f4e37;
+  text-shadow: 2px 2px #d9c5b2;
+  margin-bottom: 10px;
+}
+h2 {
+  text-align: center;
+  color: #5a3e28;
+  margin-bottom: 15px;
+}
+
+/* Nav buttons */
+nav {
+  text-align: center;
+  margin: 20px 0;
+}
+nav button {
+  width: auto;
+  margin: 0 8px;
+  padding: 10px 18px;
+  font-family: "Bookman Old Style", serif;
+  font-weight: bold;
+  background: #d9c5b2;
+  border: 2px solid #6f4e37;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #3e2f1c;
+  transition: all 0.2s ease;
+}
+nav button:hover {
+  background: #cbb097;
+  transform: scale(1.05);
+}
+
+/* Word / Quiz / Favorites boxes */
+.word-box, .favorite-card {
+  background: #f7e6d0;
+  border-radius: 10px;
+  padding: 18px;
+  margin-top: 15px;
+  box-shadow: 3px 3px 6px rgba(0,0,0,0.15);
+  border: 1px solid #d1bfa5;
+}
+
+/* Examples style */
+.example {
+  margin-left: 15px;
+  opacity: 0.9;
+  font-style: italic;
+}
+
+/* Buttons container */
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.buttons button {
+  width: 48%;
+  background: #d9c5b2;
+  border: 2px solid #6f4e37;
+  border-radius: 6px;
+  font-family: "Bookman Old Style", serif;
+  font-weight: bold;
+  cursor: pointer;
+  color: #3e2f1c;
+}
+.buttons button:hover {
+  background: #cbb097;
+}
+
+/* Favorite card delete */
+.favorite-card {
+  position: relative;
+}
+.delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #a12b2b;
+}
+
+/* Quiz options buttons */
+#quizOptions button {
+  margin: 5px 0;
+  width: 100%;
+  text-align: left;
+  background: #d9c5b2;
+  border: 2px solid #6f4e37;
+  border-radius: 6px;
+  font-family: "Bookman Old Style", serif;
+  font-weight: bold;
+  cursor: pointer;
+  color: #3e2f1c;
+  padding: 8px;
+}
+#quizOptions button:hover {
+  background: #cbb097;
+}
+
+/* Next button */
+#nextQuizBtn {
+  margin-top: 10px;
+  background: #d9c5b2;
+  border: 2px solid #6f4e37;
+  border-radius: 6px;
+  font-family: "Bookman Old Style", serif;
+  font-weight: bold;
+  cursor: pointer;
+  color: #3e2f1c;
+  padding: 10px;
+}
+#nextQuizBtn:hover {
+  background: #cbb097;
+}
+
+/* Footer */
+footer {
+  margin-top: 40px;
+  text-align: center;
+  color: #5a3e28;
+  font-family: "Bookman Old Style", serif;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* Select inputs */
+select {
+  font-size: 16px;
+  padding: 10px;
+  margin: 8px 0;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #6f4e37;
+  background: #f7e6d0;
+  color: #3e2f1c;
+}
+</style>
+
+<!-- Google Fonts for header (Saloon style) -->
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+<h1>The Wordslinger</h1>
+
+<nav>
+  <button id="homeBtn">Home</button>
+  <button id="favoritesBtn">Favorites</button>
+  <button id="quizBtn">Quiz</button>
+</nav>
+
+<!-- Home Page -->
+<div id="homePage">
+  <label>Choose Level:</label>
+  <select id="level">
+    <option value="beginner">Beginner</option>
+    <option value="journey">Journey</option>
+    <option value="advanced">Advanced</option>
+    <option value="master">Master</option>
+  </select>
+
+  <div class="word-box" id="display"></div>
+
+  <div class="buttons">
+    <button id="favBtn">Favorite</button>
+    <button id="newBtn">New Word</button>
+  </div>
+</div>
+
+<!-- Favorites Page -->
+<div id="favoritesPage" style="display:none;">
+  <h2>My Favorites</h2>
+  <div id="favoritesList"></div>
+</div>
+
+<!-- Quiz Page -->
+<div id="quizPage" style="display:none;">
+  <h2>Quiz Time!</h2>
+  <label>Choose Level:</label>
+  <select id="quizLevel">
+    <option value="beginner">Beginner</option>
+    <option value="journey">Journey</option>
+    <option value="advanced">Advanced</option>
+    <option value="master">Master</option>
+  </select>
+  <div class="word-box" id="quizBox"></div>
+  <div id="quizOptions"></div>
+  <button id="nextQuizBtn" style="display:none;">Next Question</button>
+</div>
+
+<footer>By Teacher Vic</footer>
+
+<!-- ===================== Scripts ===================== -->
+<script>
+// (Your JavaScript code remains unchanged)
+</script>
+
+</body>
+</html>
