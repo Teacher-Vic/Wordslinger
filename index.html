@@ -277,18 +277,27 @@ async function newWord() {
     const data = await res.json();
     const entry = data[0];
 
-    const meaning = entry.meanings[0];
-    const validTypes = ["noun","verb","adjective"];
-    const type = validTypes.includes(meaning.partOfSpeech) ? meaning.partOfSpeech : "default";
-    const definition = meaning.definitions[0].definition;
-
+    // Collect all definitions
+    let definitions = [];
     let examples = [];
-    entry.meanings.forEach(m => m.definitions.forEach(d => { if(d.example) examples.push(d.example) }));
+    entry.meanings.forEach(m => {
+      m.definitions.forEach(d => {
+        if(d.definition) definitions.push(`${m.partOfSpeech}: ${d.definition}`);
+        if(d.example) examples.push(d.example);
+      });
+    });
+
+    // fallback examples if none
     if (examples.length === 0) {
+      const type = entry.meanings[0]?.partOfSpeech || "default";
       examples = [makeExample(entry.word,type), makeExample(entry.word,type), makeExample(entry.word,type)];
     }
 
-    currentWord = { word: entry.word, type, def: definition, ex: examples.slice(0,3) };
+    currentWord = { 
+      word: entry.word, 
+      definitions, 
+      ex: examples.slice(0,3) 
+    };
     history.push(currentWord.word);
     localStorage.setItem("history_words", JSON.stringify(history));
     displayWord();
@@ -296,9 +305,22 @@ async function newWord() {
     const lvl = document.getElementById("level").value;
     const pool = words[lvl];
     const chosen = pool[Math.floor(Math.random() * pool.length)];
-    currentWord = { word: chosen, type: "unknown", def: "No definition available", ex: [makeExample(chosen,"default")] };
+    currentWord = { word: chosen, definitions: ["No definition available"], ex: [makeExample(chosen,"default")] };
     displayWord();
   }
+}
+
+// Display word on home
+function displayWord() {
+  const box = document.getElementById("display");
+  box.innerHTML = `
+    <strong>Word:</strong> ${currentWord.word}<br>
+    <strong>Level:</strong> ${document.getElementById("level").value}<br>
+    <strong>Definitions:</strong><br>
+    ${currentWord.definitions.map(d => `<div class="example">• ${d}</div>`).join("")}
+    <br><strong>Examples:</strong><br>
+    ${currentWord.ex.map(e=>`<div class="example">• ${e}</div>`).join("")}
+  `;
 }
 
 // Display word on home
